@@ -1,0 +1,79 @@
+import express, { type Request, type Response } from "express";
+import cors from "cors";
+import helmet from "helmet";
+import morgan from "morgan";
+import { rateLimit } from "express-rate-limit";
+import dotenv from "dotenv";
+import compression from "compression";
+import cookieParser from "cookie-parser";
+// import router from "./app/routes";
+// import { apiNotFoundHandler } from "./app/middlewares/apiNotFoundHandler";
+// import { globalErrorHandler } from "./app/middlewares/globalErrorHandler";
+
+// Load environment variables
+dotenv.config();
+
+const app = express();
+
+// Security Middleware
+app.use(helmet());
+
+// Rate Limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: "Too many requests from this IP, please try again later.",
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(limiter);
+
+// CORS
+const corsOptions = {
+  origin:
+    process.env.NODE_ENV === "production"
+      ? process.env.ALLOWED_ORIGINS?.split(",") || []
+      : ["http://localhost:3000", "http://localhost:3001"],
+  credentials: true,
+  optionsSuccessStatus: 200,
+};
+app.use(cors(corsOptions));
+app.use(cookieParser());
+// Logging
+app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
+
+// Body Parsing & Compression
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use(compression());
+
+// Health check endpoint
+app.get("/health", (req: Request, res: Response) => {
+  res.status(200).json({
+    status: "OK",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
+});
+
+// Main route
+app.get("/", (req: Request, res: Response) => {
+  res.json({
+    message: "Welcome To The Crop Diseases Ditection Web App app!",
+    version: "1.0.0",
+    environment: process.env.NODE_ENV || "development",
+  });
+});
+
+//application routes
+app.use("/api/v1", (req, res) => {
+  res.send("Hello World!");
+});
+
+// // 404 Handler
+// app.use(apiNotFoundHandler);
+
+// //global error handler
+// app.use(globalErrorHandler);
+
+export default app;
