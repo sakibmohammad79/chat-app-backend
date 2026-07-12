@@ -29,9 +29,9 @@ export const config = {
   },
   jwt: {
     access_token_secret: getEnv("ACCESS_TOKEN_SECRET"),
-    access_token_secret_expires_in: getEnv("ACCESS_TOKEN_SECRET_EXPIRES_IN"),
+    access_token_secret_expires_in: getEnv("ACCESS_TOKEN_EXPIRES_IN"),
     refresh_token_secret: getEnv("REFRESH_TOKEN_SECRET"),
-    refresh_token_secret_expires_in: getEnv("REFRESH_TOKEN_SECRET_EXPIRES_IN"),
+    refresh_token_secret_expires_in: getEnv("REFRESH_TOKEN_EXPIRES_IN"),
   },
   password: {
     reset_password_link: getEnv("RESET_PASSWORD_LINK"),
@@ -50,9 +50,5 @@ export const config = {
     cloudinary_cloud_name: getEnv("CLOUDINARY_CLOUD_NAME"),
     cloudinary_api_kay: getEnv("CLOUDINARY_API_KEY"),
     CLOUDINARY_API_SECRET: getEnv("CLOUDINARY_API_SECRET"),
-  },
-  ml: {
-    ml_service_url: getEnv("ML_SERVICE_URL"),
-    ml_timeout: getEnv("ML_TIMEOUT"),
   },
 };
