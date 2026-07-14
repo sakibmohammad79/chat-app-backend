@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 import { globalErrorHandler } from "./app/middleware/globalErrorHandler";
+import router from "./app/routes";
 // import router from "./app/routes";
 // import { apiNotFoundHandler } from "./app/middlewares/apiNotFoundHandler";
 // import { globalErrorHandler } from "./app/middlewares/globalErrorHandler";
@@ -48,15 +49,6 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(compression());
 
-// Health check endpoint
-app.get("/health", (req: Request, res: Response) => {
-  res.status(200).json({
-    status: "OK",
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-  });
-});
-
 // Main route
 app.get("/", (req: Request, res: Response) => {
   res.json({
@@ -66,10 +58,17 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 
-//application routes
-app.use("/api/v1", (req, res) => {
-  res.send("Hello World!");
+// Health check endpoint
+app.get("/health", (req: Request, res: Response) => {
+  res.status(200).json({
+    status: "OK",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
 });
+
+//application routes
+app.use("/api/v1", router);
 
 // // 404 Handler
 // app.use(apiNotFoundHandler);
