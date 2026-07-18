@@ -47,7 +47,7 @@ export { Prisma }
  */
 export type User = Prisma.UserModel
 /**
- * Model Post
+ * Model RefreshToken
  * 
  */
-export type Post = Prisma.PostModel
+export type RefreshToken = Prisma.RefreshTokenModel
