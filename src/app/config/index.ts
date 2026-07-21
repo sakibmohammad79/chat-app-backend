@@ -29,9 +29,9 @@ export const config = {
   },
   jwt: {
     access_token_secret: getEnv("ACCESS_TOKEN_SECRET"),
-    access_token_secret_expires_in: getEnv("ACCESS_TOKEN_EXPIRES_IN"),
+    access_token_expires_in: getEnv("ACCESS_TOKEN_EXPIRES_IN"),
     refresh_token_secret: getEnv("REFRESH_TOKEN_SECRET"),
-    refresh_token_secret_expires_in: getEnv("REFRESH_TOKEN_EXPIRES_IN"),
+    refresh_token_expires_in: getEnv("REFRESH_TOKEN_EXPIRES_IN"),
   },
   password: {
     reset_password_link: getEnv("RESET_PASSWORD_LINK"),
