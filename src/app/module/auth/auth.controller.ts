@@ -29,6 +29,29 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+export const login = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const result = await authService.loginService(req.body);
+
+    res.cookie("refreshToken", result.refreshToken, COOKIE_OPTIONS);
+
+    sendResponse(res, {
+      message: "Login successful",
+      data: {
+        user: result.user,
+        accessToken: result.accessToken,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const authController = {
   register,
+  login,
 };
