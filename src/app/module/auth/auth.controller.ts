@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 import { authService } from "./auth.service";
 import { sendResponse } from "../../utils/apiRespnse";
 import { config } from "../../config";
+import { ApiError } from "../../error/ApiError";
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -51,7 +52,34 @@ export const login = async (
   }
 };
 
+export const refreshToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const token = req.cookies?.refreshToken;
+
+    if (!token) {
+      throw new ApiError(401, "Refresh token missing");
+    }
+
+    const result = await authService.refreshTokenService(token);
+
+    // Notun refresh token cookie te set
+    res.cookie("refreshToken", result.refreshToken, COOKIE_OPTIONS);
+
+    sendResponse(res, {
+      message: "Token refreshed",
+      data: { accessToken: result.accessToken },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const authController = {
   register,
   login,
+  refreshToken,
 };

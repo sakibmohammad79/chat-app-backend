@@ -1,10 +1,16 @@
+import { jwt } from "zod";
 import { prisma } from "../../../lib/prisma";
 import { ApiError } from "../../error/ApiError";
 import { getRefreshTokenExpiry } from "../../helper/getRefreshTokenExpiry";
 import { excludePassword } from "../../types";
 import { comparePassword, hashPassword } from "../../utils/hashPassword";
-import { generateAccessToken, generateRefreshToken } from "../../utils/jwt";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+} from "../../utils/jwt";
 import type { LoginInput, RegisterInput } from "./auth.validation";
+import { config } from "../../config";
 
 const registerService = async (data: RegisterInput) => {
   console.log(data, "data");
@@ -107,7 +113,65 @@ const loginService = async (data: LoginInput) => {
   };
 };
 
+const refreshTokenService = async (token: string) => {
+  const storedToken = await prisma.refreshToken.findUnique({
+    where: { token },
+    include: { user: true },
+  });
+  if (!storedToken) {
+    throw new ApiError(401, "Refresh token expired or revoked");
+  }
+  if (storedToken.isRevoked || storedToken.expiresAt < new Date()) {
+    throw new ApiError(401, "Refresh token revoked or expired");
+  }
+  let decoded: ReturnType<typeof verifyRefreshToken>;
+
+  try {
+    decoded = verifyRefreshToken(token);
+  } catch {
+    throw new ApiError(401, "Invalid refresh token");
+  }
+  if (decoded.id !== storedToken.userId) {
+    throw new ApiError(401, "Invalid refresh token");
+  }
+
+  const { user } = storedToken;
+  const result = await prisma.$transaction(async (tx) => {
+    await tx.refreshToken.update({
+      where: { id: storedToken.id },
+      data: { isRevoked: true },
+    });
+
+    const jwtPayload = {
+      id: user.id,
+      email: user.email,
+    };
+
+    const newAccessToken = generateAccessToken(jwtPayload);
+    const newRefreshToken = generateRefreshToken(jwtPayload);
+
+    await tx.refreshToken.create({
+      data: {
+        token: newRefreshToken,
+        userId: user.id,
+        expiresAt: getRefreshTokenExpiry(),
+      },
+    });
+
+    return {
+      newAccessToken,
+      newRefreshToken,
+    };
+  });
+
+  return {
+    accessToken: result.newAccessToken,
+    refreshToken: result.newRefreshToken,
+  };
+};
+
 export const authService = {
   registerService,
   loginService,
+  refreshTokenService,
 };
