@@ -7,7 +7,7 @@ interface TokenPayload {
 }
 
 export const generateAccessToken = (payload: TokenPayload): string => {
-  const expiresIn: any = config.jwt.access_token_secret_expires_in;
+  const expiresIn: any = config.jwt.access_token_expires_in;
 
   return jwt.sign(payload, config.jwt.access_token_secret, {
     expiresIn,
@@ -15,7 +15,7 @@ export const generateAccessToken = (payload: TokenPayload): string => {
 };
 
 export const generateRefreshToken = (payload: TokenPayload): string => {
-  const refreshExpiresIn: any = config.jwt.refresh_token_secret_expires_in;
+  const refreshExpiresIn: any = config.jwt.refresh_token_expires_in;
 
   return jwt.sign(payload, config.jwt.refresh_token_secret, {
     expiresIn: refreshExpiresIn,

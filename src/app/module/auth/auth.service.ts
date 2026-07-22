@@ -1,4 +1,3 @@
-import { register } from "node:module";
 import { prisma } from "../../../lib/prisma";
 import { ApiError } from "../../error/ApiError";
 import { getRefreshTokenExpiry } from "../../helper/getRefreshTokenExpiry";
@@ -6,9 +5,9 @@ import { excludePassword } from "../../types";
 import { comparePassword, hashPassword } from "../../utils/hashPassword";
 import { generateAccessToken, generateRefreshToken } from "../../utils/jwt";
 import type { LoginInput, RegisterInput } from "./auth.validation";
-import type { Request } from "express";
 
 const registerService = async (data: RegisterInput) => {
+  console.log(data, "data");
   const { name, email, password } = data;
 
   // Email already exists check
@@ -16,30 +15,43 @@ const registerService = async (data: RegisterInput) => {
   if (existingUser) {
     throw new ApiError(409, "Email already registered");
   }
-
   const hashedPassword = await hashPassword(password);
 
-  const user = await prisma.user.create({
-    data: { name, email, password: hashedPassword },
-  });
+  const result = await prisma.$transaction(async (tx) => {
+    // user create
+    const user = await tx.user.create({
+      data: {
+        ...data,
+        password: hashedPassword,
+      },
+    });
 
-  // Token generate
-  const accessToken = generateAccessToken({ id: user.id, email: user.email });
-  const refreshToken = generateRefreshToken({ id: user.id, email: user.email });
+    // Token generate
+    const accessToken = generateAccessToken({ id: user.id, email: user.email });
+    const refreshToken = generateRefreshToken({
+      id: user.id,
+      email: user.email,
+    });
 
-  // Refresh token DB te save — rotation er shomoy verify korte lagbe
-  await prisma.refreshToken.create({
-    data: {
-      token: refreshToken,
-      userId: user.id,
-      expiresAt: getRefreshTokenExpiry(),
-    },
+    // Refresh token save to db
+    await tx.refreshToken.create({
+      data: {
+        token: refreshToken,
+        userId: user.id,
+        expiresAt: getRefreshTokenExpiry(),
+      },
+    });
+    return {
+      user,
+      accessToken,
+      refreshToken,
+    };
   });
 
   return {
-    user: excludePassword(user),
-    accessToken,
-    refreshToken,
+    user: excludePassword(result.user),
+    accessToken: result.accessToken,
+    refreshToken: result.refreshToken,
   };
 };
 
@@ -51,32 +63,47 @@ const loginService = async (data: LoginInput) => {
   if (!user) {
     throw new ApiError(401, "Invalid email or password");
   }
-  const isPasswordValid = comparePassword(password, user.password);
+
+  const isPasswordValid = await comparePassword(password, user.password);
+
   if (!isPasswordValid) {
     throw new ApiError(401, "Invalid email or password");
   }
-  //user only mark
-  prisma.user.update({
-    where: { id: user.id },
-    data: { isOnline: true },
+
+  const result = await prisma.$transaction(async (tx) => {
+    //user only mark
+    const updatedUser = await tx.user.update({
+      where: { id: user.id },
+      data: { isOnline: true },
+    });
+
+    //generate token
+    const accessToken = generateAccessToken({ id: user.id, email: user.email });
+    const refreshToken = generateRefreshToken({
+      id: user.id,
+      email: user.email,
+    });
+
+    //store refresh token
+    await tx.refreshToken.create({
+      data: {
+        token: refreshToken,
+        userId: user.id,
+        expiresAt: getRefreshTokenExpiry(),
+      },
+    });
+
+    return {
+      updatedUser,
+      accessToken,
+      refreshToken,
+    };
   });
 
-  //generate token
-  const accessToken = generateAccessToken({ id: user.id, email: user.email });
-  const refreshToken = generateAccessToken({ id: user.id, email: user.email });
-
-  //store refresh token
-  prisma.refreshToken.create({
-    data: {
-      token: refreshToken,
-      userId: user.id,
-      expiresAt: getRefreshTokenExpiry(),
-    },
-  });
   return {
-    user: excludePassword(user),
-    accessToken,
-    refreshToken,
+    user: excludePassword(result.updatedUser),
+    accessToken: result.accessToken,
+    refreshToken: result.refreshToken,
   };
 };
 

@@ -50,7 +50,7 @@ app.use(compression());
 // Main route
 app.get("/", (req: Request, res: Response) => {
   res.json({
-    message: "Welcome To The Crop Diseases Ditection Web App app!",
+    message: "Welcome To The My Chat App!",
     version: "1.0.0",
     environment: process.env.NODE_ENV || "development",
   });
