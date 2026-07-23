@@ -78,8 +78,27 @@ export const refreshToken = async (
   }
 };
 
+const logout = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const token = req.cookies?.refreshToken;
+    const userId = req.user!.id; // authenticate middleware guaranteed
+
+    if (token) {
+      await authService.logoutService(userId, token);
+    }
+
+    // Cookie clear
+    res.clearCookie("refreshToken", COOKIE_OPTIONS);
+
+    sendResponse(res, { message: "Logged out successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const authController = {
   register,
   login,
   refreshToken,
+  logout,
 };

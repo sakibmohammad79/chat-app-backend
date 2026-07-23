@@ -9,6 +9,7 @@ export const authenticate = (
 ) => {
   try {
     const authHeader = req.headers.authorization;
+    console.log(authHeader);
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       throw new ApiError(401, "Access token missing");

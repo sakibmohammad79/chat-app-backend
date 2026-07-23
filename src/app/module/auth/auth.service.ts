@@ -13,8 +13,7 @@ import type { LoginInput, RegisterInput } from "./auth.validation";
 import { config } from "../../config";
 
 const registerService = async (data: RegisterInput) => {
-  console.log(data, "data");
-  const { name, email, password } = data;
+  const { email, password } = data;
 
   // Email already exists check
   const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -124,6 +123,7 @@ const refreshTokenService = async (token: string) => {
   if (storedToken.isRevoked || storedToken.expiresAt < new Date()) {
     throw new ApiError(401, "Refresh token revoked or expired");
   }
+
   let decoded: ReturnType<typeof verifyRefreshToken>;
 
   try {
@@ -131,11 +131,14 @@ const refreshTokenService = async (token: string) => {
   } catch {
     throw new ApiError(401, "Invalid refresh token");
   }
+
+  console.log(decoded, "decoded");
   if (decoded.id !== storedToken.userId) {
     throw new ApiError(401, "Invalid refresh token");
   }
 
   const { user } = storedToken;
+
   const result = await prisma.$transaction(async (tx) => {
     await tx.refreshToken.update({
       where: { id: storedToken.id },
@@ -170,8 +173,25 @@ const refreshTokenService = async (token: string) => {
   };
 };
 
+const logoutService = async (userId: string, refreshToken: string) => {
+  await prisma.$transaction(async (tx) => {
+    //users all refresh token revoked
+    await tx.refreshToken.updateMany({
+      where: { token: refreshToken, userId, isRevoked: false },
+      data: { isRevoked: true },
+    });
+
+    //user offline mark
+    await tx.user.update({
+      where: { id: userId },
+      data: { isOnline: false, lastSeen: new Date() },
+    });
+  });
+};
+
 export const authService = {
   registerService,
   loginService,
   refreshTokenService,
+  logoutService,
 };
