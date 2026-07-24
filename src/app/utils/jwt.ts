@@ -7,25 +7,25 @@ interface TokenPayload {
 }
 
 export const generateAccessToken = (payload: TokenPayload): string => {
-  const expiresIn: any = config.jwt.access_token_expires_in;
+  const expiresIn: any = config.jwt.ACCESS_TOKEN_EXPIRES_IN;
 
-  return jwt.sign(payload, config.jwt.access_token_secret, {
+  return jwt.sign(payload, config.jwt.ACCESS_TOKEN_SECRET, {
     expiresIn,
   });
 };
 
 export const generateRefreshToken = (payload: TokenPayload): string => {
-  const refreshExpiresIn: any = config.jwt.refresh_token_expires_in;
+  const refreshExpiresIn: any = config.jwt.REFRESH_TOKEN_EXPIRES_IN;
 
-  return jwt.sign(payload, config.jwt.refresh_token_secret, {
+  return jwt.sign(payload, config.jwt.REFRESH_TOKEN_SECRET, {
     expiresIn: refreshExpiresIn,
   });
 };
 
 export const verifyAccessToken = (token: string): TokenPayload => {
-  return jwt.verify(token, config.jwt.access_token_secret) as TokenPayload;
+  return jwt.verify(token, config.jwt.ACCESS_TOKEN_SECRET) as TokenPayload;
 };
 
 export const verifyRefreshToken = (token: string): TokenPayload => {
-  return jwt.verify(token, config.jwt.refresh_token_secret) as TokenPayload;
+  return jwt.verify(token, config.jwt.REFRESH_TOKEN_SECRET) as TokenPayload;
 };

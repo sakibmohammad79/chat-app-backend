@@ -33,7 +33,7 @@ export const globalErrorHandler = (
   const isOperationalError = (err as any).isOperational || false;
 
   // In production, terminate the process for unexpected programming errors
-  if (config.app.nodeEnv === "production" && !isOperationalError) {
+  if (config.app.NODE_ENV === "production" && !isOperationalError) {
     console.error("Critical programming error! Exiting process safely...");
     process.exit(1);
   }
@@ -43,7 +43,7 @@ export const globalErrorHandler = (
   return res.status(500).json({
     success: false,
     message: "Internal server error",
-    ...(config.app.nodeEnv === "development" && {
+    ...(config.app.NODE_ENV === "development" && {
       stack: err.stack,
     }),
   });

@@ -12,7 +12,7 @@ interface PaginationMeta {
   hasPrevPage: boolean;
 }
 
-// Prisma skip/take calculate
+//Prisma skip/take calculate
 export const getPagination = (params: PaginationParams) => {
   const page = Math.max(1, params.page);
   const limit = Math.min(50, Math.max(1, params.limit));
@@ -25,7 +25,7 @@ export const getPagination = (params: PaginationParams) => {
   };
 };
 
-// page meta info for response
+//page meta info for response
 export const buildPaginationMeta = (
   total: number,
   page: number,

@@ -21,12 +21,12 @@ if (cluster.isPrimary) {
   });
 } else {
   // Worker process code
-  const server = app.listen(config.app.port, () => {
+  const server = app.listen(config.app.PORT, () => {
     console.log(
-      `Worker process ${process.pid} running on port ${config.app.port}`,
+      `Worker process ${process.pid} running on port ${config.app.PORT}`,
     );
-    console.log(`Environment: ${config.app.nodeEnv || process.env.NODE_ENV}`);
-    console.log(`Local URL: http://localhost:${config.app.port}`);
+    console.log(`Environment: ${config.app.NODE_ENV || process.env.NODE_ENV}`);
+    console.log(`Local URL: http://localhost:${config.app.PORT}`);
   });
 
   // Graceful shutdown handling for workers

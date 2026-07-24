@@ -18,37 +18,37 @@ function getEnvArray(key: string, fallback?: string): string[] {
 
 export const config = {
   app: {
-    nodeEnv: getEnv("NODE_ENV", "development"),
-    port: Number(getEnv("PORT", "3000")),
+    NODE_ENV: getEnv("NODE_ENV", "development"),
+    PORT: Number(getEnv("PORT", "3000")),
   },
   database: {
-    url: getEnv("DATABASE_URL"),
+    URL: getEnv("DATABASE_URL"),
   },
   cors: {
-    allowedOrigins: getEnvArray("ALLOWED_ORIGINS", "http://localhost:3000"),
+    ALLOWED_ORIGINS: getEnvArray("ALLOWED_ORIGINS", "http://localhost:3000"),
   },
   jwt: {
-    access_token_secret: getEnv("ACCESS_TOKEN_SECRET"),
-    access_token_expires_in: getEnv("ACCESS_TOKEN_EXPIRES_IN"),
-    refresh_token_secret: getEnv("REFRESH_TOKEN_SECRET"),
-    refresh_token_expires_in: getEnv("REFRESH_TOKEN_EXPIRES_IN"),
+    ACCESS_TOKEN_SECRET: getEnv("ACCESS_TOKEN_SECRET"),
+    ACCESS_TOKEN_EXPIRES_IN: getEnv("ACCESS_TOKEN_EXPIRES_IN"),
+    REFRESH_TOKEN_SECRET: getEnv("REFRESH_TOKEN_SECRET"),
+    REFRESH_TOKEN_EXPIRES_IN: getEnv("REFRESH_TOKEN_EXPIRES_IN"),
   },
   password: {
-    reset_password_link: getEnv("RESET_PASSWORD_LINK"),
-    reset_password_token_secret: getEnv("RESET_PASSWORD_TOKEN_SECRET"),
-    reset_password_token_exp_in: getEnv("RESET_PASSWORD_EXPIRES_IN"),
+    RESET_PASSWORD_LINK: getEnv("RESET_PASSWORD_LINK"),
+    RESET_PASSWORD_TOKEN_SECRET: getEnv("RESET_PASSWORD_TOKEN_SECRET"),
+    RESET_PASSWORD_EXPIRES_IN: getEnv("RESET_PASSWORD_EXPIRES_IN"),
   },
   emailSender: {
-    smtp_user: getEnv("SMTP_USER"),
-    smtp_user_pass: getEnv("SMTP_PASSWORD"),
-    smtp_hos: getEnv("SMTP_HOST"),
-    smtp_port: getEnv("SMTP_PORT"),
-    email_from: getEnv("EMAIL_FROM"),
-    email_from_name: getEnv("EMAIL_FROM_NAME"),
+    SMTP_USER: getEnv("SMTP_USER"),
+    SMTP_PASSWORD: getEnv("SMTP_PASSWORD"),
+    SMTP_HOST: getEnv("SMTP_HOST"),
+    SMTP_PORT: getEnv("SMTP_PORT"),
+    EMAIL_FROM: getEnv("EMAIL_FROM"),
+    EMAIL_FROM_NAME: getEnv("EMAIL_FROM_NAME"),
   },
   cloudinary: {
-    cloudinary_cloud_name: getEnv("CLOUDINARY_CLOUD_NAME"),
-    cloudinary_api_kay: getEnv("CLOUDINARY_API_KEY"),
+    CLOUDINARY_CLOUD_NAME: getEnv("CLOUDINARY_CLOUD_NAME"),
+    CLOUDINARY_API_KEY: getEnv("CLOUDINARY_API_KEY"),
     CLOUDINARY_API_SECRET: getEnv("CLOUDINARY_API_SECRET"),
   },
 };

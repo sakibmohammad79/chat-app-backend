@@ -4,7 +4,7 @@ import { PrismaClient } from "../generated/prisma/client";
 import { config } from "../app/config";
 
 const adapter = new PrismaPg({
-  connectionString: config.database.url,
+  connectionString: config.database.URL,
 });
 
 const globalForPrisma = globalThis as {
@@ -16,11 +16,11 @@ export const prisma =
   new PrismaClient({
     adapter,
     log:
-      config.app.nodeEnv === "development"
+      config.app.NODE_ENV === "development"
         ? ["query", "warn", "error"]
         : ["error"],
   });
 
-if (config.app.nodeEnv !== "production") {
+if (config.app.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
 }

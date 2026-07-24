@@ -6,7 +6,7 @@ import { ApiError } from "../../error/ApiError";
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: config.app.nodeEnv === "production",
+  secure: config.app.NODE_ENV === "production",
   sameSite: "lax" as const,
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days ms
 };
