@@ -66,7 +66,7 @@ export const refreshToken = async (
 
     const result = await authService.refreshTokenService(token);
 
-    // Notun refresh token cookie te set
+    // new refresh token set in cookie
     res.cookie("refreshToken", result.refreshToken, COOKIE_OPTIONS);
 
     sendResponse(res, {

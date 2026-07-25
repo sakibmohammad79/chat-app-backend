@@ -8,11 +8,7 @@ export const registerSchema = z.object({
       .max(50, "Name must be at most 50 characters")
       .trim(),
 
-    email: z
-      .string({ message: "Email is required" })
-      .email("Invalid email format")
-      .toLowerCase()
-      .trim(),
+    email: z.email("Invalid email format").toLowerCase().trim(),
 
     password: z
       .string({ message: "Password is required" })
@@ -29,6 +25,6 @@ export const loginSchema = z.object({
   }),
 });
 
-// TypeScript type infer — service/controller e use hobe
+// TypeScript type infer for use in service/controller
 export type RegisterInput = z.infer<typeof registerSchema>["body"];
 export type LoginInput = z.infer<typeof loginSchema>["body"];

@@ -6,9 +6,9 @@ import { rateLimit } from "express-rate-limit";
 import dotenv from "dotenv";
 import compression from "compression";
 import cookieParser from "cookie-parser";
-import { globalErrorHandler } from "./app/middleware/globalErrorHandler";
+import { globalErrorHandler } from "./app/middleware/globalerrorhandler.middleware";
 import router from "./app/routes";
-import { apiNotFoundHandler } from "./app/middleware/apiNotFoundHanler";
+import { apiNotFoundHandler } from "./app/middleware/apinotfound.middleware";
 
 // Load environment variables
 dotenv.config();
