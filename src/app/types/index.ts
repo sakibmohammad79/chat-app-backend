@@ -14,3 +14,15 @@ export const excludePassword = (user: {
   const { password: _password, ...userWithoutPassword } = user;
   return userWithoutPassword;
 };
+
+export const userSelect = {
+  id: true,
+  name: true,
+  email: true,
+  avatar: true,
+  bio: true,
+  isOnline: true,
+  lastSeen: true,
+  createdAt: true,
+  updatedAt: true,
+} as const;
