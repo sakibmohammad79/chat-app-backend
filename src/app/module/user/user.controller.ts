@@ -28,7 +28,27 @@ export const getUserById = async (
   }
 };
 
+const updateProfile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const updated = await userService.updateProfileService(
+      req.user!.id,
+      req.body,
+    );
+    sendResponse(res, {
+      message: "Profiled updated",
+      data: updated,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const userController = {
   getMyProfile,
   getUserById,
+  updateProfile,
 };
