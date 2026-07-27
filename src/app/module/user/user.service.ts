@@ -3,6 +3,7 @@ import { prisma } from "../../../lib/prisma";
 import { userSelect } from "../../types";
 import { ApiError } from "../../error/ApiError";
 import type { UpdateProfileInput } from "./user.validation";
+import cloudinary from "../../config/cloudinary";
 
 export const getMyProfileService = async (userId: string) => {
   const user = await prisma.user.findUnique({
@@ -44,8 +45,33 @@ const updateProfileService = async (
   return updated;
 };
 
+const updateAvatarService = async (userId: string, avatarUrl: string) => {
+  const currentUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { avatar: true },
+  });
+  if (currentUser?.avatar) {
+    const urlParts = currentUser.avatar.split("/");
+    const fileWithExt = urlParts[urlParts.length - 1];
+    const publicId = `chat-app/avatars/${fileWithExt?.split(".")[0]}`;
+    try {
+      await cloudinary.uploader.destroy(publicId);
+    } catch {
+      console.warn("Failed to delete old avatar from cloudinary", publicId);
+    }
+  }
+  const updated = await prisma.user.update({
+    where: { id: userId },
+    data: { avatar: avatarUrl },
+    select: userSelect,
+  });
+
+  return updated;
+};
+
 export const userService = {
   getMyProfileService,
   getUserByIdService,
   updateProfileService,
+  updateAvatarService,
 };
