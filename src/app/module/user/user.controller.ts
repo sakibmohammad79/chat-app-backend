@@ -47,8 +47,30 @@ const updateProfile = async (
   }
 };
 
+const updateAvatar = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, message: "No file uploaded" });
+      return;
+    }
+    const avatarUrl = req.file.path;
+    const updated = await userService.updateAvatarService(
+      req.user!.id,
+      avatarUrl,
+    );
+    sendResponse(res, { message: "Avatar updated", data: updated });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const userController = {
   getMyProfile,
   getUserById,
   updateProfile,
+  updateAvatar,
 };

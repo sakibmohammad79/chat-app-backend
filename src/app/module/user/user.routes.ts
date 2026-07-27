@@ -3,6 +3,7 @@ import { authenticate } from "../../utils/auth";
 import { userController } from "./user.controller";
 import { validate } from "../../utils/zodValidation";
 import { updateProfileSchema, userIdParamSchema } from "./user.validation";
+import { handleAvatarUpload } from "../../middleware/upload.middleware";
 
 const router = Router();
 
@@ -17,5 +18,7 @@ router.patch(
 );
 
 router.get("/:id", validate(userIdParamSchema), userController.getUserById);
+
+router.post("/me/avatar", handleAvatarUpload, userController.updateAvatar);
 
 export const userRoutes = router;
