@@ -2,8 +2,9 @@ import type { Request, Response } from "express";
 import { prisma } from "../../../lib/prisma";
 import { userSelect } from "../../types";
 import { ApiError } from "../../error/ApiError";
-import type { UpdateProfileInput } from "./user.validation";
+import type { SearchUserQuery, UpdateProfileInput } from "./user.validation";
 import cloudinary from "../../config/cloudinary";
+import { buildPaginationMeta, getPagination } from "../../utils/pagination";
 
 export const getMyProfileService = async (userId: string) => {
   const user = await prisma.user.findUnique({
@@ -65,8 +66,40 @@ const updateAvatarService = async (userId: string, avatarUrl: string) => {
     data: { avatar: avatarUrl },
     select: userSelect,
   });
-
   return updated;
+};
+
+const searchUserService = async (
+  currentUserId: string,
+  query: SearchUserQuery,
+) => {
+  const { q, page, limit } = query;
+  const { skip, take } = getPagination({ page, limit });
+  const where = {
+    AND: [
+      { id: { not: currentUserId } },
+      {
+        OR: [
+          { name: { contains: q, mode: "insensitive" as const } },
+          { email: { contains: q, mode: "insensitive" as const } },
+        ],
+      },
+    ],
+  };
+  const [total, users] = await prisma.$transaction([
+    prisma.user.count({ where }),
+    prisma.user.findMany({
+      where,
+      select: userSelect,
+      skip,
+      take,
+      orderBy: { name: "asc" },
+    }),
+  ]);
+  return {
+    users,
+    meta: buildPaginationMeta(total, page, limit),
+  };
 };
 
 export const userService = {
@@ -74,4 +107,5 @@ export const userService = {
   getUserByIdService,
   updateProfileService,
   updateAvatarService,
+  searchUserService,
 };
