@@ -1,7 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { userService } from "./user.service";
 import { sendResponse } from "../../utils/apiRespnse";
-import { send } from "node:process";
 
 export const getMyProfile = async (
   req: Request,
@@ -91,4 +90,5 @@ export const userController = {
   getUserById,
   updateProfile,
   updateAvatar,
+  searchUsers,
 };
