@@ -4,7 +4,7 @@ interface ResponseOptions {
   statusCode?: number;
   message?: string;
   data?: unknown;
-  meta?: Record<string, unknown>;
+  meta?: unknown;
 }
 
 export const sendResponse = (
@@ -15,6 +15,6 @@ export const sendResponse = (
     success: true,
     message,
     data,
-    ...(meta && { meta }),
+    ...(meta as Record<string, unknown>),
   });
 };

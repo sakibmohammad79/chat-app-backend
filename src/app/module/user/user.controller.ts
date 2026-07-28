@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { userService } from "./user.service";
 import { sendResponse } from "../../utils/apiRespnse";
+import { send } from "node:process";
 
 export const getMyProfile = async (
   req: Request,
@@ -63,6 +64,23 @@ const updateAvatar = async (
       avatarUrl,
     );
     sendResponse(res, { message: "Avatar updated", data: updated });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const searchUsers = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await userService.searchUserService(req.user!.id, {
+      q: req.query.q as string,
+      page: Number(req.query.page) || 1,
+      limit: Number(req.query.limit) || 10,
+    });
+
+    sendResponse(res, {
+      data: result.users,
+      meta: result.meta,
+    });
   } catch (err) {
     next(err);
   }
