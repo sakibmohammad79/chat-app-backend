@@ -53,7 +53,7 @@ model Conversation {
   updatedAt DateTime @updatedAt
 
   //relations
-   members  ConversationMember[]
+  members  ConversationMember[]
 
   @@map("conversations")
 }
