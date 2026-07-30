@@ -1,3 +1,4 @@
+import { Param } from "@prisma/client/runtime/client";
 import { z } from "zod";
 
 export const createConversationSchema = z.object({
@@ -22,7 +23,22 @@ export const createGroupSchema = z.object({
   }),
 });
 
+const updateGroupSchema = z.object({
+  params: z.object({
+    id: z.string().uuid("Invalid conversation ID"),
+  }),
+  body: z.object({
+    name: z
+      .string()
+      .min(2, "Group name must be at least 2 characters")
+      .max(50, "Group name must be at most 50 characters")
+      .trim()
+      .optional(),
+  }),
+});
+
 export type CreateConversationInput = z.infer<
   typeof createConversationSchema
 >["body"];
 export type CreateGroupInput = z.infer<typeof createGroupSchema>["body"];
+export type UpdateGroupInput = z.infer<typeof updateGroupSchema>["body"];
