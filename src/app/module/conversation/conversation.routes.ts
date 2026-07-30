@@ -8,6 +8,21 @@ export const createConversationSchema = z.object({
   }),
 });
 
+export const createGroupSchema = z.object({
+  body: z.object({
+    name: z
+      .string({ error: "Group name is required" })
+      .min(2, "Group must be at least 2 characters")
+      .max(50, "Group name must be at most 50 characters")
+      .trim(),
+    memberIds: z
+      .array(z.string().uuid("Invalid member ID"))
+      .min(2, "Group must have at least 2 other members")
+      .max(49, "Group can have at most 50 members"),
+  }),
+});
+
 export type CreateConversationInput = z.infer<
   typeof createConversationSchema
 >["body"];
+export type CreateGroupInput = z.infer<typeof createGroupSchema>["body"];
