@@ -37,8 +37,30 @@ const updateGroupSchema = z.object({
   }),
 });
 
+export const addMemberSchema = z.object({
+  params: z.object({
+    id: z.string().uuid("Invalid conversation ID"),
+  }),
+  body: z.object({
+    name: z
+      .string()
+      .min(2, "Group name must be at least 2 characters")
+      .max(50, "group name must at most 50 characters")
+      .trim()
+      .optional(),
+  }),
+});
+
+export const removeMemberSchema = z.object({
+  params: z.object({
+    id: z.string().uuid("Invalid conversation ID"),
+    userId: z.string().uuid("Invalid user ID"),
+  }),
+});
+
 export type CreateConversationInput = z.infer<
   typeof createConversationSchema
 >["body"];
 export type CreateGroupInput = z.infer<typeof createGroupSchema>["body"];
 export type UpdateGroupInput = z.infer<typeof updateGroupSchema>["body"];
+export type AddMembersInput = z.infer<typeof addMemberSchema>["body"];
