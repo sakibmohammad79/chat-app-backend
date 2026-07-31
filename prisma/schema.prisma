@@ -8,39 +8,43 @@ datasource db {
 }
 
 // ─── User ─────────────────────────────────────────────────────────────────────
-
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String
-  avatar    String?
-  bio       String?
+  id       String  @id @default(cuid())
+  name     String
+  email    String  @unique
+  password String
+  avatar   String?
+  bio      String?
 
-  isOnline  Boolean  @default(false)
-  lastSeen  DateTime @default(now())
+  isOnline Boolean  @default(false)
+  lastSeen DateTime @default(now())
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  // Relations
-  refreshTokens RefreshToken[]
+
+  refreshTokens       RefreshToken[]
   conversationMembers ConversationMember[]
-  
+  sentMessages        Message[]
+  messageReactions    MessageReaction[]
+
   @@map("users")
 }
 
 model RefreshToken {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())
   token     String   @unique
   userId    String
   expiresAt DateTime
   isRevoked Boolean  @default(false)
+
   createdAt DateTime @default(now())
 
-  // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("refresh_tokens")
 }
+
+// ─── Conversation ─────────────────────────────────────────────────────────────
 
 model Conversation {
   id          String  @id @default(cuid())
@@ -52,27 +56,25 @@ model Conversation {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  //relations
   members  ConversationMember[]
+  messages Message[]
 
   @@map("conversations")
 }
 
 model ConversationMember {
-  id String @id @default(uuid())
-  userId String
+  id             String     @id @default(cuid())
+  userId         String
   conversationId String
-  role MemberRole @default(MEMBER)
-
+  role           MemberRole @default(MEMBER)
   joinedAt       DateTime   @default(now())
-  lastReadAt     DateTime   @default(now()) // unread count calculate
+  lastReadAt     DateTime   @default(now()) // unread count calculate 
 
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, conversationId]) //one user in only one conversation
+  @@unique([userId, conversationId]) // one user in one conversation only one time
   @@map("conversation_members")
-
 }
 
 enum MemberRole {
@@ -80,128 +82,50 @@ enum MemberRole {
   ADMIN
 }
 
+// ─── Message ──────────────────────────────────────────────────────────────────
 
+model Message {
+  id             String      @id @default(cuid())
+  content        String
+  type           MessageType @default(TEXT)
+  senderId       String
+  conversationId String
+  replyToId      String?
+  isDeleted      Boolean     @default(false)
+  isEdited       Boolean     @default(false)
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  sender       User              @relation(fields: [senderId], references: [id])
+  conversation Conversation      @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  replyTo      Message?          @relation("MessageReply", fields: [replyToId], references: [id])
+  replies      Message[]         @relation("MessageReply")
+  reactions    MessageReaction[]
 
+  @@map("messages")
+}
 
-// model User {
-//   id       String  @id @default(cuid())
-//   name     String
-//   email    String  @unique
-//   password String
-//   avatar   String?
-//   bio      String?
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+}
 
-//   isOnline Boolean  @default(false)
-//   lastSeen DateTime @default(now())
+model MessageReaction {
+  id        String @id @default(cuid())
+  emoji     String
+  userId    String
+  messageId String
 
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
 
-//   refreshTokens       RefreshToken[]
-//   conversationMembers ConversationMember[]
-//   sentMessages        Message[]
-//   messageReactions    MessageReaction[]
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
-//   @@map("users")
-// }
+  @@unique([userId, messageId, emoji]) // same emoji same user in one message
+  @@map("message_reactions")
+}
 
-// model RefreshToken {
-//   id        String   @id @default(cuid())
-//   token     String   @unique
-//   userId    String
-//   expiresAt DateTime
-//   isRevoked Boolean  @default(false)
-
-//   createdAt DateTime @default(now())
-
-//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-//   @@map("refresh_tokens")
-// }
-
-// // ─── Conversation ─────────────────────────────────────────────────────────────
-
-// model Conversation {
-//   id          String  @id @default(cuid())
-//   isGroup     Boolean @default(false)
-//   name        String?
-//   avatar      String?
-//   inviteToken String? @unique
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   members  ConversationMember[]
-//   messages Message[]
-
-//   @@map("conversations")
-// }
-
-// model ConversationMember {
-//   id             String     @id @default(cuid())
-//   userId         String
-//   conversationId String
-//   role           MemberRole @default(MEMBER)
-//   joinedAt       DateTime   @default(now())
-//   lastReadAt     DateTime   @default(now()) // unread count calculate korte
-
-//   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-//   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-
-//   @@unique([userId, conversationId]) // ek user ek conversation e ekbar
-//   @@map("conversation_members")
-// }
-
-// enum MemberRole {
-//   MEMBER
-//   ADMIN
-// }
-
-// // ─── Message ──────────────────────────────────────────────────────────────────
-
-// model Message {
-//   id             String      @id @default(cuid())
-//   content        String
-//   type           MessageType @default(TEXT)
-//   senderId       String
-//   conversationId String
-//   replyToId      String?
-//   isDeleted      Boolean     @default(false)
-//   isEdited       Boolean     @default(false)
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   sender       User              @relation(fields: [senderId], references: [id])
-//   conversation Conversation      @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-//   replyTo      Message?          @relation("MessageReply", fields: [replyToId], references: [id])
-//   replies      Message[]         @relation("MessageReply")
-//   reactions    MessageReaction[]
-
-//   @@map("messages")
-// }
-
-// enum MessageType {
-//   TEXT
-//   IMAGE
-//   FILE
-// }
-
-// model MessageReaction {
-//   id        String @id @default(cuid())
-//   emoji     String
-//   userId    String
-//   messageId String
-
-//   createdAt DateTime @default(now())
-
-//   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-//   message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
-
-//   @@unique([userId, messageId, emoji]) // same emoji same user once per message
-//   @@map("message_reactions")
-// }
 
 
