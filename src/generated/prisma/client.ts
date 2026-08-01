@@ -61,3 +61,13 @@ export type Conversation = Prisma.ConversationModel
  * 
  */
 export type ConversationMember = Prisma.ConversationMemberModel
+/**
+ * Model Message
+ * 
+ */
+export type Message = Prisma.MessageModel
+/**
+ * Model MessageReaction
+ * 
+ */
+export type MessageReaction = Prisma.MessageReactionModel

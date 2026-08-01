@@ -15,3 +15,12 @@ export const MemberRole = {
 } as const
 
 export type MemberRole = (typeof MemberRole)[keyof typeof MemberRole]
+
+
+export const MessageType = {
+  TEXT: 'TEXT',
+  IMAGE: 'IMAGE',
+  FILE: 'FILE'
+} as const
+
+export type MessageType = (typeof MessageType)[keyof typeof MessageType]
