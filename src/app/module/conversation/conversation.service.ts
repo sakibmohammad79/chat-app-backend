@@ -14,7 +14,7 @@ export const getMyConversationsService = async (userId: string) => {
   // Unread count  — after lastreadAt, how many messages are there
   const conversationsWithUnread = await Promise.all(
     conversations.map(async (conv) => {
-      const myMember = conv.members.find((m) => m.user.id === userId);
+      const myMember = conv.members.find((m: any) => m.user.id === userId);
 
       const unreadCount = await prisma.message.count({
         where: {
@@ -30,4 +30,8 @@ export const getMyConversationsService = async (userId: string) => {
   );
 
   return conversationsWithUnread;
+};
+
+export const conversationService = {
+  getMyConversationsService,
 };
