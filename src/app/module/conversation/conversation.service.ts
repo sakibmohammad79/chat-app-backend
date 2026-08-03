@@ -1,5 +1,12 @@
 import { prisma } from "../../../lib/prisma";
+import { ApiError } from "../../error/ApiError";
 import { conversationSelect } from "../../types";
+import type {
+  CreateConversationInput,
+  CreateGroupInput,
+  UpdateGroupInput,
+  AddMembersInput,
+} from "./conversation.validation";
 
 //  Get My Conversations
 export const getMyConversationsService = async (userId: string) => {
@@ -32,6 +39,50 @@ export const getMyConversationsService = async (userId: string) => {
   return conversationsWithUnread;
 };
 
+//create one to one conversation
+const createConversationservice = async (
+  currentUserId: string,
+  data: CreateConversationInput,
+) => {
+  const { targetUserId } = data;
+  if (targetUserId === currentUserId)
+    throw new ApiError(400, "You cannot create conversation with yourself");
+  //check target user exists
+  const targetUser = await prisma.user.findUnique({
+    where: { id: targetUserId },
+  });
+  if (!targetUser) throw new ApiError(404, "Target user not found");
+  //already exists one to one conversation check
+  const existingConversation = await prisma.conversation.findFirst({
+    where: {
+      isGroup: false,
+      AND: [
+        { members: { some: { userId: currentUserId } } },
+        { members: { some: { userId: targetUserId } } },
+      ],
+    },
+    select: conversationSelect,
+  });
+  // already exists so no create new one, return existing conversation
+  if (existingConversation) {
+    return { conversation: existingConversation, isNew: false };
+  }
+  const conversation = await prisma.conversation.create({
+    data: {
+      isGroup: false,
+      members: {
+        create: [
+          { userId: currentUserId, role: "ADMIN" },
+          { userId: targetUserId, role: "MEMBER" },
+        ],
+      },
+    },
+    select: conversationSelect,
+  });
+  return { conversation, isNew: true };
+};
+
 export const conversationService = {
   getMyConversationsService,
+  createConversationservice,
 };
