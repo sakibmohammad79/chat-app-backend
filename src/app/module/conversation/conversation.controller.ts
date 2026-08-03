@@ -11,6 +11,7 @@ const getMyConversations = async (
     const conversations = await conversationService.getMyConversationsService(
       req.user!.id,
     );
+    // send response
     sendResponse(res, { data: conversations });
   } catch (error) {
     next(error);
