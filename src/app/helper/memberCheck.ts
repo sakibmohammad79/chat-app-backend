@@ -2,7 +2,7 @@ import { prisma } from "../../lib/prisma";
 import { ApiError } from "../error/ApiError";
 
 //  member check
-const assertMember = async (conversationId: string, userId: string) => {
+export const assertMember = async (conversationId: string, userId: string) => {
   const member = await prisma.conversationMember.findUnique({
     where: { userId_conversationId: { userId, conversationId } },
   });
@@ -11,7 +11,7 @@ const assertMember = async (conversationId: string, userId: string) => {
   return member;
 };
 
-const assertAdmin = async (conversationId: string, userId: string) => {
+export const assertAdmin = async (conversationId: string, userId: string) => {
   const member = await assertMember(conversationId, userId);
   if (member.role !== "ADMIN") {
     throw new ApiError(403, "Only group admins can perform this action");

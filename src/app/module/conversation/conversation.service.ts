@@ -1,12 +1,8 @@
 import { prisma } from "../../../lib/prisma";
 import { ApiError } from "../../error/ApiError";
+import { assertMember } from "../../helper/memberCheck";
 import { conversationSelect } from "../../types";
-import type {
-  CreateConversationInput,
-  CreateGroupInput,
-  UpdateGroupInput,
-  AddMembersInput,
-} from "./conversation.validation";
+import type { CreateConversationInput } from "./conversation.validation";
 
 //  Get My Conversations
 export const getMyConversationsService = async (userId: string) => {
@@ -82,7 +78,25 @@ const createConversationservice = async (
   return { conversation, isNew: true };
 };
 
+const getConverdationByIdService = async (
+  converdationId: string,
+  userId: string,
+) => {
+  await assertMember(converdationId, userId);
+
+  const conversation = await prisma.conversation.findUnique({
+    where: { id: converdationId },
+    select: conversationSelect,
+  });
+
+  if (!conversation) {
+    throw new ApiError(404, "Conversation not found");
+  }
+  return conversation;
+};
+
 export const conversationService = {
   getMyConversationsService,
   createConversationservice,
+  getConverdationByIdService,
 };
