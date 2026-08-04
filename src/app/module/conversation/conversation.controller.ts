@@ -18,8 +18,29 @@ const getMyConversations = async (
   }
 };
 
-
+const createConversation = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const result = await conversationService.createConversationservice(
+      req.user!.id,
+      req.body,
+    );
+    sendResponse(res, {
+      statusCode: result.isNew ? 201 : 200,
+      message: result.isNew
+        ? "Conversation created successfully"
+        : "Conversation already exists",
+      data: result.conversation,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const conversationController = {
   getMyConversations,
+  createConversation,
 };
