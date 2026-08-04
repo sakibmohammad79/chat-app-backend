@@ -58,6 +58,12 @@ export const removeMemberSchema = z.object({
   }),
 });
 
+export const conversationIdParamSchema = z.object({
+  params: z.object({
+    id: z.string().cuid("Invalid conversation ID"),
+  }),
+});
+
 export type CreateConversationInput = z.infer<
   typeof createConversationSchema
 >["body"];

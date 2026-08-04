@@ -2,7 +2,10 @@ import { Router } from "express";
 import { authenticate } from "../../utils/auth";
 import { conversationController } from "./conversation.controller";
 import { validate } from "../../utils/zodValidation";
-import { createConversationSchema } from "./conversation.validation";
+import {
+  conversationIdParamSchema,
+  createConversationSchema,
+} from "./conversation.validation";
 
 const router = Router();
 
@@ -14,6 +17,12 @@ router.post(
   "/",
   validate(createConversationSchema),
   conversationController.createConversation,
+);
+
+router.get(
+  "/:id",
+  validate(conversationIdParamSchema),
+  conversationController.getConversationById,
 );
 
 export const conversationRoutes = router;

@@ -40,7 +40,25 @@ const createConversation = async (
   }
 };
 
+const getConversationById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const conversationId = req.params.id;
+    const conversation = await conversationService.getConverdationByIdService(
+      conversationId as string,
+      req.user!.id,
+    );
+    sendResponse(res, { data: conversation });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const conversationController = {
   getMyConversations,
   createConversation,
+  getConversationById,
 };
