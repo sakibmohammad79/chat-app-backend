@@ -5,6 +5,7 @@ import { validate } from "../../utils/zodValidation";
 import {
   conversationIdParamSchema,
   createConversationSchema,
+  updateGroupSchema,
 } from "./conversation.validation";
 
 const router = Router();
@@ -25,6 +26,12 @@ router.get(
   "/:id",
   validate(conversationIdParamSchema),
   conversationController.getConversationById,
+);
+
+router.patch(
+  "/:id",
+  validate(updateGroupSchema),
+  conversationController.updateGroup,
 );
 
 export const conversationRoutes = router;

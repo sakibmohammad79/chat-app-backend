@@ -23,7 +23,7 @@ export const createGroupSchema = z.object({
   }),
 });
 
-const updateGroupSchema = z.object({
+export const updateGroupSchema = z.object({
   params: z.object({
     id: z.string().uuid("Invalid conversation ID"),
   }),
