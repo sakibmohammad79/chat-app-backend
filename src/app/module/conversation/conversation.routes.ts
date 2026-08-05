@@ -19,6 +19,8 @@ router.post(
   conversationController.createConversation,
 );
 
+router.post("/group", conversationController.createGroup);
+
 router.get(
   "/:id",
   validate(conversationIdParamSchema),

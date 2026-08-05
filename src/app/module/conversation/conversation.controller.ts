@@ -57,8 +57,25 @@ const getConversationById = async (
   }
 };
 
+const createGroup = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const group = await conversationService.createGroupService(
+      req.user!.id,
+      req.body,
+    );
+    sendResponse(res, {
+      statusCode: 201,
+      message: "Group created successfully",
+      data: group,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const conversationController = {
   getMyConversations,
   createConversation,
   getConversationById,
+  createGroup,
 };
