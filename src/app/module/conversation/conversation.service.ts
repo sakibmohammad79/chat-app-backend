@@ -3,6 +3,7 @@ import { ApiError } from "../../error/ApiError";
 import { assertMember } from "../../helper/memberCheck";
 import { conversationSelect } from "../../types";
 import type { CreateConversationInput } from "./conversation.validation";
+import type { CreateGroupInput } from "./conversation.validation";
 
 //  Get My Conversations
 export const getMyConversationsService = async (userId: string) => {
@@ -95,8 +96,48 @@ const getConverdationByIdService = async (
   return conversation;
 };
 
+const createGroupService = async (
+  currentUserId: string,
+  data: CreateGroupInput,
+) => {
+  const { name, memberIds } = data;
+  //duplicate member check
+  const uniqueIds = [...new Set(memberIds)];
+  //filter out current user id from memberIds
+  const otherMeberIds = uniqueIds.filter((id) => id !== currentUserId);
+  //check all member exists
+  const users = await prisma.user.findMany({
+    where: { id: { in: otherMeberIds } },
+    select: { id: true },
+  });
+  if (users.length !== otherMeberIds.length) {
+    throw new ApiError(404, "One or more members not found");
+  }
+  const group = await prisma.conversation.create({
+    data: {
+      isGroup: true,
+      name,
+      members: {
+        create: [
+          { userId: currentUserId, role: "ADMIN" },
+          ...otherMeberIds.map((id) => ({
+            userId: id,
+            role: "MEMBER" as const,
+          })),
+        ],
+      },
+    },
+    select: conversationSelect,
+  });
+  return group;
+};
+
+
+
+
 export const conversationService = {
   getMyConversationsService,
   createConversationservice,
   getConverdationByIdService,
+  createGroupService,
 };
