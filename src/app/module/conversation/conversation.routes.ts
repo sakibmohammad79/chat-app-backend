@@ -3,6 +3,7 @@ import { authenticate } from "../../utils/auth";
 import { conversationController } from "./conversation.controller";
 import { validate } from "../../utils/zodValidation";
 import {
+  addMembersSchema,
   conversationIdParamSchema,
   createConversationSchema,
   updateGroupSchema,
@@ -32,6 +33,13 @@ router.patch(
   "/:id",
   validate(updateGroupSchema),
   conversationController.updateGroup,
+);
+
+// add members
+router.post(
+  "/:id/members",
+  validate(addMembersSchema),
+  conversationController.addMembers,
 );
 
 export const conversationRoutes = router;
