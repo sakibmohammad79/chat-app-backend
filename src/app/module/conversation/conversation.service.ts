@@ -3,6 +3,7 @@ import { ApiError } from "../../error/ApiError";
 import { assertAdmin, assertMember } from "../../helper/memberCheck";
 import { conversationSelect } from "../../types";
 import type {
+  AddMembersInput,
   CreateConversationInput,
   UpdateGroupInput,
 } from "./conversation.validation";
@@ -148,11 +149,63 @@ const updateGroupService = async (
     throw new ApiError(400, "Not a group conversation");
 
   await assertAdmin(conversationId, userId);
+
   const updated = await prisma.conversation.update({
     where: { id: conversationId },
     data: {
       ...(data.name && { name: data.name }),
     },
+    select: conversationSelect,
+  });
+  return updated;
+};
+
+const addMembersService = async (
+  conversationId: string,
+  userId: string,
+  data: AddMembersInput,
+) => {
+  const conversation = await prisma.conversation.findUnique({
+    where: { id: conversationId },
+    include: { members: { select: { userId: true } } },
+  });
+
+  if (!conversation) {
+    throw new ApiError(404, "Conversation not found");
+  }
+  if (!conversation.isGroup) {
+    throw new ApiError(400, "Cannot add members to a private chat");
+  }
+
+  await assertAdmin(conversationId, userId);
+
+  const existingMemberIds = conversation.members.map((m) => m.userId);
+  const newMemberIds = data.memberIds.filter(
+    (id) => !existingMemberIds.includes(id),
+  );
+
+  if (newMemberIds.length === 0) {
+    throw new ApiError(400, "All provided users are already member");
+  }
+
+  const users = await prisma.user.findMany({
+    where: { id: { in: newMemberIds } },
+    select: { id: true },
+  });
+
+  if (users.length !== newMemberIds.length) {
+    throw new ApiError(404, "One or more users not found");
+  }
+  await prisma.conversationMember.createMany({
+    data: newMemberIds.map((id: string) => ({
+      userId: id,
+      conversationId,
+      role: "MEMBER",
+    })),
+  });
+
+  const updated = await prisma.conversation.findUnique({
+    where: { id: conversationId },
     select: conversationSelect,
   });
   return updated;
@@ -164,4 +217,5 @@ export const conversationService = {
   getConverdationByIdService,
   createGroupService,
   updateGroupService,
+  addMembersService,
 };

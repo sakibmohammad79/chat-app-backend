@@ -37,17 +37,15 @@ export const updateGroupSchema = z.object({
   }),
 });
 
-export const addMemberSchema = z.object({
+export const addMembersSchema = z.object({
   params: z.object({
-    id: z.string().uuid("Invalid conversation ID"),
+    id: z.string().cuid("Invalid conversation ID"),
   }),
   body: z.object({
-    name: z
-      .string()
-      .min(2, "Group name must be at least 2 characters")
-      .max(50, "group name must at most 50 characters")
-      .trim()
-      .optional(),
+    memberIds: z
+      .array(z.string().cuid("Invalid member ID"))
+      .min(1, "At least one member ID required")
+      .max(20, "Cannot add more than 20 members at once"),
   }),
 });
 
@@ -69,4 +67,4 @@ export type CreateConversationInput = z.infer<
 >["body"];
 export type CreateGroupInput = z.infer<typeof createGroupSchema>["body"];
 export type UpdateGroupInput = z.infer<typeof updateGroupSchema>["body"];
-export type AddMembersInput = z.infer<typeof addMemberSchema>["body"];
+export type AddMembersInput = z.infer<typeof addMembersSchema>["body"];
