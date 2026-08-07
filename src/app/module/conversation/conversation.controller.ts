@@ -106,6 +106,23 @@ const addMembers = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+export const removeMember = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    await conversationService.removeMemberService(
+      req.params.id as string,
+      req.user!.id,
+      req.params.userId as string,
+    );
+    sendResponse(res, { message: "Member removed" });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const conversationController = {
   getMyConversations,
   createConversation,
