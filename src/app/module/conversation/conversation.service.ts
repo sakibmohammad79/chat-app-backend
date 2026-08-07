@@ -211,6 +211,38 @@ const addMembersService = async (
   return updated;
 };
 
+// ─── Remove Member
+export const removeMemberService = async (
+  conversationId: string,
+  adminId: string,
+  targetUserId: string,
+) => {
+  const conversation = await prisma.conversation.findUnique({
+    where: { id: conversationId },
+  });
+
+  if (!conversation) throw new ApiError(404, "Conversation not found");
+  if (!conversation.isGroup)
+    throw new ApiError(400, "Cannot remove from private chat");
+
+  await assertAdmin(conversationId, adminId);
+
+  if (targetUserId === adminId) {
+    throw new ApiError(400, "Use leave group to remove yourself");
+  }
+
+  const targetMember = await prisma.conversationMember.findUnique({
+    where: { userId_conversationId: { userId: targetUserId, conversationId } },
+  });
+
+  if (!targetMember)
+    throw new ApiError(404, "User is not a member of this group");
+
+  await prisma.conversationMember.delete({
+    where: { userId_conversationId: { userId: targetUserId, conversationId } },
+  });
+};
+
 export const conversationService = {
   getMyConversationsService,
   createConversationservice,
@@ -218,4 +250,5 @@ export const conversationService = {
   createGroupService,
   updateGroupService,
   addMembersService,
+  removeMemberService,
 };
