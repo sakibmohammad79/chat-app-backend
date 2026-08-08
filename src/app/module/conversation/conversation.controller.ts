@@ -130,4 +130,5 @@ export const conversationController = {
   createGroup,
   updateGroup,
   addMembers,
+  removeMember,
 };

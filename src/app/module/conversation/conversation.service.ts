@@ -243,6 +243,56 @@ export const removeMemberService = async (
   });
 };
 
+//  Leave Group
+export const leaveGroupService = async (
+  conversationId: string,
+  userId: string,
+) => {
+  const conversation = await prisma.conversation.findUnique({
+    where: { id: conversationId },
+    include: {
+      members: { select: { userId: true, role: true } },
+    },
+  });
+
+  if (!conversation) throw new ApiError(404, "Conversation not found");
+  if (!conversation.isGroup)
+    throw new ApiError(400, "Cannot leave a private chat");
+
+  await assertMember(conversationId, userId);
+
+  const remainingMembers = conversation.members.filter(
+    (m) => m.userId !== userId,
+  );
+
+  // when last member leave the group is deleted
+  if (remainingMembers.length === 0) {
+    await prisma.conversation.delete({ where: { id: conversationId } });
+    return { deleted: true };
+  }
+
+  // when admin gone admin will be next member
+  const leavingMember = conversation.members.find((m) => m.userId === userId);
+  if (leavingMember?.role === "ADMIN") {
+    const nextAdmin = remainingMembers[0]!;
+    await prisma.conversationMember.update({
+      where: {
+        userId_conversationId: {
+          userId: nextAdmin.userId,
+          conversationId,
+        },
+      },
+      data: { role: "ADMIN" },
+    });
+  }
+
+  await prisma.conversationMember.delete({
+    where: { userId_conversationId: { userId, conversationId } },
+  });
+
+  return { deleted: false };
+};
+
 export const conversationService = {
   getMyConversationsService,
   createConversationservice,
@@ -251,4 +301,5 @@ export const conversationService = {
   updateGroupService,
   addMembersService,
   removeMemberService,
+  leaveGroupService,
 };
