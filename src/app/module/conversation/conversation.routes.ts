@@ -49,4 +49,10 @@ router.delete(
   conversationController.removeMember,
 );
 
+router.delete(
+  "/:id/leave",
+  validate(conversationIdParamSchema),
+  conversationController.leaveGroup,
+);
+
 export const conversationRoutes = router;

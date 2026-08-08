@@ -123,6 +123,26 @@ export const removeMember = async (
   }
 };
 
+export const leaveGroup = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const result = await conversationService.leaveGroupService(
+      req.params.id as string,
+      req.user!.id,
+    );
+    sendResponse(res, {
+      message: result.deleted
+        ? "Group deleted (last member left)"
+        : "Left group",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const conversationController = {
   getMyConversations,
   createConversation,
@@ -131,4 +151,5 @@ export const conversationController = {
   updateGroup,
   addMembers,
   removeMember,
+  leaveGroup,
 };
