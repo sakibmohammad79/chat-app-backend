@@ -211,6 +211,15 @@ const addMembersService = async (
   return updated;
 };
 
+const markAsReadService = async (conversationId: string, userId: string) => {
+  await assertMember(conversationId, userId);
+
+  await prisma.conversationMember.update({
+    where: { userId_conversationId: { userId, conversationId } },
+    data: { lastReadAt: new Date() },
+  });
+};
+
 export const conversationService = {
   getMyConversationsService,
   createConversationservice,
@@ -218,4 +227,5 @@ export const conversationService = {
   createGroupService,
   updateGroupService,
   addMembersService,
+  markAsReadService,
 };
