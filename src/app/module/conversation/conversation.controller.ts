@@ -106,6 +106,18 @@ const addMembers = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const markAsRead = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    await conversationService.markAsReadService(
+      req.params.id as string,
+      req.user!.id,
+    );
+    sendResponse(res, { message: "Marked as read" });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const conversationController = {
   getMyConversations,
   createConversation,
@@ -113,4 +125,5 @@ export const conversationController = {
   createGroup,
   updateGroup,
   addMembers,
+  markAsRead,
 };
