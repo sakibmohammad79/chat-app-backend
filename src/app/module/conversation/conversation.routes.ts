@@ -6,6 +6,7 @@ import {
   addMembersSchema,
   conversationIdParamSchema,
   createConversationSchema,
+  removeMemberSchema,
   updateGroupSchema,
 } from "./conversation.validation";
 
@@ -40,6 +41,18 @@ router.post(
   "/:id/members",
   validate(addMembersSchema),
   conversationController.addMembers,
+);
+
+router.delete(
+  "/:id/members/:userId",
+  validate(removeMemberSchema),
+  conversationController.removeMember,
+);
+
+router.delete(
+  "/:id/leave",
+  validate(conversationIdParamSchema),
+  conversationController.leaveGroup,
 );
 
 export const conversationRoutes = router;

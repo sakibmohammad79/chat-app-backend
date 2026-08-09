@@ -106,13 +106,38 @@ const addMembers = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const markAsRead = async (req: Request, res: Response, next: NextFunction) => {
+export const removeMember = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
-    await conversationService.markAsReadService(
+    await conversationService.removeMemberService(
+      req.params.id as string,
+      req.user!.id,
+      req.params.userId as string,
+    );
+    sendResponse(res, { message: "Member removed" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const leaveGroup = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const result = await conversationService.leaveGroupService(
       req.params.id as string,
       req.user!.id,
     );
-    sendResponse(res, { message: "Marked as read" });
+    sendResponse(res, {
+      message: result.deleted
+        ? "Group deleted (last member left)"
+        : "Left group",
+    });
   } catch (err) {
     next(err);
   }
@@ -125,5 +150,6 @@ export const conversationController = {
   createGroup,
   updateGroup,
   addMembers,
-  markAsRead,
+  removeMember,
+  leaveGroup,
 };
