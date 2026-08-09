@@ -1,6 +1,8 @@
 import type { NextFunction, Request, Response } from "express";
 import { conversationService } from "./conversation.service";
 import { sendResponse } from "../../utils/apiRespnse";
+import { assertMember } from "../../helper/memberCheck";
+import { prisma } from "../../../lib/prisma";
 
 const getMyConversations = async (
   req: Request,
@@ -143,6 +145,18 @@ export const leaveGroup = async (
   }
 };
 
+const markAsRead = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    await conversationService.markAsReadService(
+      req.params.id as string,
+      req.user!.id,
+    );
+    sendResponse(res, { message: "Marked as read" });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const conversationController = {
   getMyConversations,
   createConversation,
@@ -152,4 +166,5 @@ export const conversationController = {
   addMembers,
   removeMember,
   leaveGroup,
+  markAsRead,
 };

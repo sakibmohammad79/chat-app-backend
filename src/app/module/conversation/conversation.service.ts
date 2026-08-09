@@ -293,6 +293,15 @@ export const leaveGroupService = async (
   return { deleted: false };
 };
 
+const markAsReadService = async (conversationId: string, userId: string) => {
+  await assertMember(conversationId, userId);
+
+  await prisma.conversationMember.update({
+    where: { userId_conversationId: { userId, conversationId } },
+    data: { lastReadAt: new Date() },
+  });
+};
+
 export const conversationService = {
   getMyConversationsService,
   createConversationservice,
@@ -302,4 +311,5 @@ export const conversationService = {
   addMembersService,
   removeMemberService,
   leaveGroupService,
+  markAsReadService,
 };

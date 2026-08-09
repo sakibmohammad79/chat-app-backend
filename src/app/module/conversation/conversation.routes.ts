@@ -55,4 +55,10 @@ router.delete(
   conversationController.leaveGroup,
 );
 
+router.patch(
+  "/:id/read",
+  validate(conversationIdParamSchema),
+  conversationController.markAsRead,
+);
+
 export const conversationRoutes = router;
