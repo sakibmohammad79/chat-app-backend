@@ -1,4 +1,5 @@
-import { z } from "zod";
+import { Param } from "@prisma/client/runtime/client";
+import { emoji, z } from "zod";
 
 export const sendMessageSchema = z.object({
   params: z.object({
@@ -26,5 +27,36 @@ export const getMessagesSchema = z.object({
   }),
 });
 
+export const editMessageSchema = z.object({
+  params: z.object({
+    id: z.uuid("Invalid message ID"),
+  }),
+  body: z.object({
+    content: z
+      .string({ error: "Content is required" })
+      .min(1, "Message can not be empty")
+      .max(2000, "Message too long")
+      .trim(),
+  }),
+});
+
+// delete/reaction
+
+export const messageIdParamSchema = z.object({
+  params: z.object({
+    id: z.uuid("Invalid message ID"),
+  }),
+});
+
+export const addReactionSchema = z.object({
+  params: z.object({
+    id: z.uuid("Invalid message ID"),
+  }),
+  body: z.object({
+    emoji: z.string({ error: "Emoji is required" }).min(1).max(10),
+  }),
+});
+
 export type SendMessageInput = z.infer<typeof sendMessageSchema>["body"];
 export type getMessageQuery = z.infer<typeof getMessagesSchema>["query"];
+export type EditMessageInput = z.infer<typeof editMessageSchema>["body"]
