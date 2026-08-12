@@ -82,12 +82,12 @@ const getMessagesService = async (
   userId: string,
   query: getMessageQuery,
 ) => {
-  // 1. Check membership
+  // Check membership
   await assertConversationMember(conversationId, userId);
 
   const { cursor, limit } = query;
 
-  // 2. check cursor message
+  // check cursor message
   let cursorCreatedAt: Date | undefined;
 
   if (cursor) {
@@ -113,7 +113,7 @@ const getMessagesService = async (
     cursorCreatedAt = cursorMessage.createdAt;
   }
 
-  // 3. Messages fetch
+  //  Messages fetch
   const messages = await prisma.message.findMany({
     where: {
       conversationId,
@@ -136,7 +136,7 @@ const getMessagesService = async (
     take: limit,
   });
 
-  // 4. have more message
+  //  have more message
   const hasMore = messages.length === limit;
 
   // 5. Next cursor
