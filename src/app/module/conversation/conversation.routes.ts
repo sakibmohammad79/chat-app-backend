@@ -9,6 +9,8 @@ import {
   removeMemberSchema,
   updateGroupSchema,
 } from "./conversation.validation";
+import { getMessagesSchema } from "../message/message.validation";
+import { messageController } from "../message/message.controller";
 
 const router = Router();
 
@@ -59,6 +61,12 @@ router.patch(
   "/:id/read",
   validate(conversationIdParamSchema),
   conversationController.markAsRead,
+);
+
+router.get(
+  "/conversations/:id/messages",
+  validate(getMessagesSchema),
+  messageController.getMessages,
 );
 
 export const conversationRoutes = router;

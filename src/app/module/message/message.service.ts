@@ -2,7 +2,6 @@ import { prisma } from "../../../lib/prisma";
 import { ApiError } from "../../error/ApiError";
 import type { getMessageQuery } from "./message.validation";
 
-
 // Message response in same shape
 const messageSelect = {
   id: true,
@@ -67,10 +66,7 @@ const assertConversationMember = async (
   });
 
   if (!member) {
-    throw new ApiError(
-      403,
-      "You are not a member of this conversation",
-    );
+    throw new ApiError(403, "You are not a member of this conversation");
   }
 
   return member;
@@ -139,10 +135,10 @@ const getMessagesService = async (
   //  have more message
   const hasMore = messages.length === limit;
 
-  // 5. Next cursor
+  //  Next cursor
   const nextCursor =
     hasMore && messages.length > 0
-      ? messages[messages.length - 1].id
+      ? (messages[messages.length - 1]?.id ?? null)
       : null;
 
   //  oldest → newest
