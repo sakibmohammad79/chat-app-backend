@@ -25,6 +25,24 @@ const getMessages = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const sendMessage = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const message = await messageService.sendMessageService(
+      req.params.id as string,
+      req.user!.id,
+      req.body,
+    );
+    sendResponse(res, {
+      statusCode: 201,
+      message: "Message send successfully.",
+      data: message,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const messageController = {
   getMessages,
+  sendMessage,
 };

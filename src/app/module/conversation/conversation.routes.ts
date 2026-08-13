@@ -9,7 +9,10 @@ import {
   removeMemberSchema,
   updateGroupSchema,
 } from "./conversation.validation";
-import { getMessagesSchema } from "../message/message.validation";
+import {
+  getMessagesSchema,
+  sendMessageSchema,
+} from "../message/message.validation";
 import { messageController } from "../message/message.controller";
 
 const router = Router();
@@ -67,6 +70,12 @@ router.get(
   "/conversations/:id/messages",
   validate(getMessagesSchema),
   messageController.getMessages,
+);
+
+router.post(
+  "/conversations/:id/messages",
+  validate(sendMessageSchema),
+  messageController.sendMessage,
 );
 
 export const conversationRoutes = router;
