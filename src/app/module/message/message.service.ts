@@ -1,6 +1,6 @@
 import { prisma } from "../../../lib/prisma";
 import { ApiError } from "../../error/ApiError";
-import type { getMessageQuery } from "./message.validation";
+import type { getMessageQuery, SendMessageInput } from "./message.validation";
 
 // Message response in same shape
 const messageSelect = {
@@ -105,15 +105,12 @@ const getMessagesService = async (
     if (cursorMessage.conversationId !== conversationId) {
       throw new ApiError(400, "Invalid cursor");
     }
-
     cursorCreatedAt = cursorMessage.createdAt;
   }
-
   //  Messages fetch
   const messages = await prisma.message.findMany({
     where: {
       conversationId,
-
       // if has cursor get before this messages
       ...(cursorCreatedAt && {
         createdAt: {
@@ -151,6 +148,49 @@ const getMessagesService = async (
   };
 };
 
+const sendMessageService = async (
+  conversationId: string,
+  senderId: string,
+  data: SendMessageInput,
+) => {
+  await assertConversationMember(conversationId, senderId);
+
+  if (data.replyToId) {
+    const replyTarget = await prisma.message.findUnique({
+      where: { id: data.replyToId },
+    });
+    if (!replyTarget || replyTarget.conversationId !== conversationId) {
+      throw new ApiError(404, "Reply target message not found");
+    }
+    if (replyTarget.isDeleted) {
+      throw new ApiError(400, "Cannot reply to a deleted message");
+    }
+  }
+
+  const result = await prisma.$transaction(async (tx) => {
+    const message = await tx.message.create({
+      data: {
+        content: data.content,
+        type: data.type,
+        senderId,
+        conversationId,
+        ...(data.replyToId && { replyToId: data.replyToId }),
+      },
+      select: messageSelect,
+    });
+
+    //conversation updatedAt update - shwoing in sidebar top
+    await tx.conversation.update({
+      where: { id: conversationId },
+      data: { updatedAt: new Date() },
+    });
+    return message;
+  });
+
+  return result;
+};
+
 export const messageService = {
   getMessagesService,
+  sendMessageService,
 };
