@@ -1,6 +1,10 @@
 import { prisma } from "../../../lib/prisma";
 import { ApiError } from "../../error/ApiError";
-import type { getMessageQuery, SendMessageInput } from "./message.validation";
+import type {
+  EditMessageInput,
+  getMessageQuery,
+  SendMessageInput,
+} from "./message.validation";
 
 // Message response in same shape
 const messageSelect = {
@@ -190,7 +194,42 @@ const sendMessageService = async (
   return result;
 };
 
+const editMessageService = async (
+  messageId: string,
+  userId: string,
+  data: EditMessageInput,
+) => {
+  const message = await prisma.message.findUnique({
+    where: { id: messageId },
+  });
+  if (!message) {
+    throw new ApiError(404, "Message not found");
+  }
+  if (message.isDeleted) {
+    throw new ApiError(400, "Cannot edit a deleted message");
+  }
+  if (message.senderId !== userId) {
+    throw new ApiError(403, "You can only edit your own message");
+  }
+
+  //when content same
+  if (message.content === data.content) {
+    throw new ApiError(400, "No change made");
+  }
+
+  const update = await prisma.message.update({
+    where: { id: messageId },
+    data: {
+      content: data.content,
+      isEdited: true,
+    },
+    select: messageSelect,
+  });
+  return update;
+};
+
 export const messageService = {
   getMessagesService,
   sendMessageService,
+  editMessageService,
 };
