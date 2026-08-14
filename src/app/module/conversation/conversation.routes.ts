@@ -65,15 +65,15 @@ router.patch(
   validate(conversationIdParamSchema),
   conversationController.markAsRead,
 );
-
+// logic and req & res handle in message module
 router.get(
-  "/conversations/:id/messages",
+  "/:id/messages",
   validate(getMessagesSchema),
   messageController.getMessages,
 );
 
 router.post(
-  "/conversations/:id/messages",
+  "/:id/messages",
   validate(sendMessageSchema),
   messageController.sendMessage,
 );

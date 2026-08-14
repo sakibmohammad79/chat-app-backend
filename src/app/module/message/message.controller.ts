@@ -42,7 +42,24 @@ const sendMessage = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const editMessage = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const updateMessage = await messageService.editMessageService(
+      req.params.id as string,
+      req.user!.id,
+      req.body,
+    );
+    sendResponse(res, {
+      message: "Message edit successfully",
+      data: updateMessage,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const messageController = {
   getMessages,
   sendMessage,
+  editMessage,
 };

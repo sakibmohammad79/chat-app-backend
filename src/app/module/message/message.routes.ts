@@ -1,17 +1,17 @@
 import { Router } from "express";
 import { authenticate } from "../../utils/auth";
 import { validate } from "../../utils/zodValidation";
-import { getMessagesSchema } from "./message.validation";
+import { editMessageSchema } from "./message.validation";
 import { messageController } from "./message.controller";
 
 const router = Router();
 
 router.use(authenticate);
 
-router.get(
-  "/conversations/:id/messages",
-  validate(getMessagesSchema),
-  messageController.getMessages,
+router.patch(
+  "/:id",
+  validate(editMessageSchema),
+  messageController.editMessage,
 );
 
 export const messageRoutes = router;
