@@ -228,8 +228,46 @@ const editMessageService = async (
   return update;
 };
 
+const deleteMessageService = async (messageId: string, userId: string) => {
+  const message = await prisma.message.findUnique({
+    where: { id: messageId },
+    include: {
+      conversation: {
+        include: {
+          members: { select: { userId: true, role: true } },
+        },
+      },
+    },
+  });
+  if (!message) {
+    throw new ApiError(404, "Message not found");
+  }
+  if (message.isDeleted) {
+    throw new ApiError(400, "Message already deleted");
+  }
+  const isSender = message.senderId === userId;
+  const isGroupAdmin = message.conversation.members.some(
+    (m) => m.userId === userId && m.role === "ADMIN",
+  );
+
+  if (!isSender && !isGroupAdmin) {
+    throw new ApiError(403, "You cannot delete this message");
+  }
+
+  const deleted = await prisma.message.update({
+    where: { id: messageId },
+    data: {
+      isDeleted: true,
+      content: "This message was deleted",
+    },
+    select: messageSelect,
+  });
+  return deleted;
+};
+
 export const messageService = {
   getMessagesService,
   sendMessageService,
   editMessageService,
+  deleteMessageService,
 };
