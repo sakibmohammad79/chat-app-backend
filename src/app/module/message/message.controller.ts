@@ -58,8 +58,28 @@ const editMessage = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const deleteMessage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const deleted = await messageService.deleteMessageService(
+      req.params.id as string,
+      req.user!.id,
+    );
+    sendResponse(res, {
+      message: "Message deleted",
+      data: deleted,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const messageController = {
   getMessages,
   sendMessage,
   editMessage,
+  deleteMessage,
 };
