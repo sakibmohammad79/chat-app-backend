@@ -265,6 +265,44 @@ const deleteMessageService = async (messageId: string, userId: string) => {
   return deleted;
 };
 
+//toggle reaction
+export const toggleReactionService = async (
+  messageId: string,
+  userId: string,
+  emoji: string,
+) => {
+  const message = await prisma.message.findUnique({
+    where: { id: messageId },
+    select: { id: true, isDeleted: true, conversationId: true },
+  });
+
+  if (!message) throw new ApiError(404, "Message not found");
+  if (message.isDeleted)
+    throw new ApiError(400, "Cannot react to a deleted message");
+
+  // user is this conversation member?
+  await assertConversationMember(message.conversationId, userId);
+
+  // has same emoji - remove toggle
+  const existing = await prisma.messageReaction.findUnique({
+    where: { userId_messageId_emoji: { userId, messageId, emoji } },
+  });
+
+  if (existing) {
+    await prisma.messageReaction.delete({
+      where: { userId_messageId_emoji: { userId, messageId, emoji } },
+    });
+    return { action: "removed", emoji };
+  }
+
+  // if empty then add
+  await prisma.messageReaction.create({
+    data: { userId, messageId, emoji },
+  });
+
+  return { action: "added", emoji };
+};
+
 export const messageService = {
   getMessagesService,
   sendMessageService,
