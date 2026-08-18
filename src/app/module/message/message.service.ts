@@ -280,7 +280,7 @@ export const toggleReactionService = async (
   if (message.isDeleted)
     throw new ApiError(400, "Cannot react to a deleted message");
 
-  // user is this conversation member?
+  // user - this conversation member?
   await assertConversationMember(message.conversationId, userId);
 
   // has same emoji - remove toggle
@@ -308,4 +308,5 @@ export const messageService = {
   sendMessageService,
   editMessageService,
   deleteMessageService,
+  toggleReactionService
 };

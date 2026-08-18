@@ -77,9 +77,32 @@ const deleteMessage = async (
   }
 };
 
+const toggleReaction = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const result = await messageService.toggleReactionService(
+      req.params.id as string,
+      req.user!.id,
+      req.body.emoji,
+    );
+
+    sendResponse(res, {
+      message:
+        result.action === "added" ? "Reaction added" : "Reaction removed",
+      data: result,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const messageController = {
   getMessages,
   sendMessage,
   editMessage,
   deleteMessage,
+  toggleReaction,
 };
