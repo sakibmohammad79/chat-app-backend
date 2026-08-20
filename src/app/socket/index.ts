@@ -43,4 +43,13 @@ export const initSocket = (httpServer: HttpServer) => {
       next(new Error("Invalid or expired token"));
     }
   });
+
+  //connection handler
+  io.on("connection", (socket) => {
+    const authSocket = socket as AuthSocket;
+
+    console.log(`Socket connected: ${authSocket.user.id} (${socket.id})`);
+
+    //every handler register
+  });
 };
