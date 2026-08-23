@@ -54,7 +54,7 @@ export const initSocket = (httpServer: HttpServer) => {
 
     socket.on("disconnect", (reason) => {
       console.log(
-        `❌ Socket disconnected: ${authSocket.user.id} — reason: ${reason}`,
+        `Socket disconnected: ${authSocket.user.id} — reason: ${reason}`,
       );
     });
   });
