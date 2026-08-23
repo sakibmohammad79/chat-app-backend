@@ -24,3 +24,37 @@ export interface ClientToServerEvents {
 
   mark_seen: (data: { conversationId: string; messageId: string }) => void;
 }
+
+// server -> client events
+export interface ServerToClientEvents {
+  new_message: (message: unknown) => void;
+  message_edited: (message: unknown) => void;
+  message_deleted: (data: {
+    messageId: string;
+    conversationId: string;
+  }) => void;
+  reaction_toggled: (data: {
+    messageId: string;
+    action: "added" | "removed";
+    emoji: string;
+    userId: string;
+  }) => void;
+
+  user_typing: (data: {
+    conversationId: string;
+    userId: string;
+    userName: string;
+  }) => void;
+  user_stop_typing: (data: { conversationId: string; userId: string }) => void;
+
+  user_online: (userId: string) => void;
+  user_offline: (data: { userId: string; lastSeen: Date }) => void;
+
+  message_seen: (data: {
+    conversationId: string;
+    messageId: string;
+    seenBy: { userId: string; userName: string };
+  }) => void;
+
+  error: (data: { message: string }) => void;
+}
