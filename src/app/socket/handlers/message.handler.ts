@@ -61,5 +61,23 @@ export const registerMessageHandler = (socket: AuthSocket) => {
   // send message
   socket.on("send_message", async (data) => {
     const { conversationId, content, type = "TEXT", replyToId } = data;
+
+    try {
+      //Member verify
+      const member = await prisma.conversationMember.findUnique({
+        where: { userId_conversationId: { userId, conversationId } },
+      });
+      if (!member) {
+        socket.emit("error", { message: "Not a member of this conversation" });
+        return;
+      }
+      //content validate
+      if (!content?.trim()) {
+        socket.emit("error", { message: "Message cannot be empty" });
+      }
+      if (content.length > 2000) {
+        socket.emit("error", { message: "Message too long" });
+      }
+    } catch (err) {}
   });
 };
