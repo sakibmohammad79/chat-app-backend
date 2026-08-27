@@ -78,6 +78,47 @@ export const registerMessageHandler = (socket: AuthSocket) => {
       if (content.length > 2000) {
         socket.emit("error", { message: "Message too long" });
       }
-    } catch (err) {}
+
+      // replyToId validate
+      if (replyToId) {
+        const replyTarget = await prisma.message.findUnique({
+          where: { id: replyToId },
+        });
+        if (
+          !replyTarget ||
+          replyTarget.conversationId !== conversationId ||
+          replyTarget.isDeleted
+        ) {
+          socket.emit("error", { message: "Invalid reply target" });
+          return;
+        }
+      }
+      //save to db
+      const message = await prisma.message.create({
+        data: {
+          content: content.trim(),
+          type,
+          senderId: userId,
+          conversationId,
+          ...(replyToId && { replyToId }),
+        },
+        select: messageSelect,
+      });
+      //conversation updatedAt updatre => for sidebar sort
+      await prisma.conversation.update({
+        where: { id: conversationId },
+        data: { updatedAt: new Date() },
+      });
+
+      //emit to all member in room - with sender
+      socket.to(conversationId).emit("new_message", message);
+      //sender emit with yourself
+      socket.emit("new_message", message);
+    } catch (err) {
+      console.error("Send message error", err);
+      socket.emit("error", { message: "Failed to send message" });
+    }
   });
+
+  // mark - seen
 };
