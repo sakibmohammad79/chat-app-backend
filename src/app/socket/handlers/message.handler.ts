@@ -121,4 +121,32 @@ export const registerMessageHandler = (socket: AuthSocket) => {
   });
 
   // mark - seen
+  socket.on("mark_seen", async ({ conversationId, messageId }) => {
+    try {
+      const member = await prisma.conversationMember.findUnique({
+        where: { userId_conversationId: { userId, conversationId } },
+        include: { user: { select: { id: true, name: true } } },
+      });
+
+      if (!member) return;
+
+      // lastReadAt update
+      await prisma.conversationMember.update({
+        where: { userId_conversationId: { userId, conversationId } },
+        data: { lastReadAt: new Date() },
+      });
+
+      // knowing all conversation member => for showing seen indicator
+      socket.to(conversationId).emit("message_seen", {
+        conversationId,
+        messageId,
+        seenBy: {
+          userId: member.user.id,
+          userName: member.user.name,
+        },
+      });
+    } catch (err) {
+      console.error("Mark seen error:", err);
+    }
+  });
 };
