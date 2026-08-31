@@ -4,6 +4,9 @@ import { config } from "../config";
 import { setIO } from "./socket.instance";
 import { verifyAccessToken } from "../utils/jwt";
 import type { AuthSocket } from "./socket.types";
+import { registerPresenceHandlers } from "./handlers/presence.handler";
+import { registerTypingHandlers } from "./handlers/typing.handler";
+import { registerMessageHandler } from "./handlers/message.handler";
 
 export const initSocket = (httpServer: HttpServer) => {
   const io = new Server(httpServer, {
@@ -51,6 +54,9 @@ export const initSocket = (httpServer: HttpServer) => {
     console.log(`Socket connected: ${authSocket.user.id} (${socket.id})`);
 
     //every handler register
+    registerPresenceHandlers(authSocket);
+    registerTypingHandlers(authSocket);
+    registerMessageHandler(authSocket);
 
     socket.on("disconnect", (reason) => {
       console.log(

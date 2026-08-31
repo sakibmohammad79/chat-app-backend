@@ -58,6 +58,6 @@ export const registerPresenceHandlers = (socket: AuthSocket) => {
   //online
   handleOnline();
 
-  // offline
+  // offline when disconnect
   socket.on("disconnect", handleOffline);
 };
