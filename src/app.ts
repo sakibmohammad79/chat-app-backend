@@ -9,6 +9,8 @@ import cookieParser from "cookie-parser";
 import { globalErrorHandler } from "./app/middleware/globalerrorhandler.middleware";
 import router from "./app/routes";
 import { apiNotFoundHandler } from "./app/middleware/apinotfound.middleware";
+import { initSocket } from "./app/socket";
+import { createServer } from "http";
 
 // Load environment variables
 dotenv.config();
@@ -17,6 +19,7 @@ const app = express();
 
 // Security Middleware
 app.use(helmet());
+const httpServer = createServer(app);
 
 // Rate Limiting
 const limiter = rateLimit({
@@ -73,5 +76,7 @@ app.use(apiNotFoundHandler);
 
 // //global error handler
 app.use(globalErrorHandler);
+
+initSocket(httpServer);
 
 export default app;
